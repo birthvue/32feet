@@ -16,7 +16,7 @@ namespace InTheHand.Bluetooth
     /// <summary>
     /// Represents a GATT Service, a collection of characteristics and relationships to other services that encapsulate the behavior of part of a device.
     /// </summary>
-    [DebuggerDisplay("{Uuid} (Service)")]
+    [DebuggerDisplay("GattService - {Uuid} (Service)")]
     public sealed partial class GattService
     {
         internal GattService(BluetoothDevice device)

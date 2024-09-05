@@ -9,6 +9,7 @@ using CoreBluetooth;
 using Foundation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace InTheHand.Bluetooth
@@ -189,7 +190,8 @@ namespace InTheHand.Bluetooth
 
         private void Peripheral_UpdatedCharacteristicValue(object sender, CBCharacteristicEventArgs e)
         {
-            if (e.Characteristic == _characteristic)
+            System.Diagnostics.Debug.WriteLine($"e.Char ={e.Characteristic} - Char = {_characteristic}");
+            if (e.Characteristic.Equals(_characteristic))
             {
                 Exception? error = null;
 

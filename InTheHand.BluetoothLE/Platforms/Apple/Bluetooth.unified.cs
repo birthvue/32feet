@@ -208,8 +208,9 @@ namespace InTheHand.Bluetooth
             System.Diagnostics.Debug.WriteLine("target id list is " + targetItems);
             _manager.ScanForPeripherals(targetItems);
             int cnt = 0;
-            TimeSpan ts = TimeSpan.FromSeconds(5);
-            //   while ((_manager.IsScanning) && (cnt < 3))
+            TimeSpan ts = TimeSpan.FromSeconds(8);
+            Stopwatch sw = Stopwatch.StartNew();
+            //while ((_manager.IsScanning) && (cnt < 3))
             {
                 cnt++;
                 try
@@ -218,10 +219,18 @@ namespace InTheHand.Bluetooth
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message); //task was canceled
+                    System.Diagnostics.Debug.WriteLine(ex.Message); //task was canceled
                 }
             }
             _manager.StopScan();
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine("PlatformScanForDevices.ios scan took"  + sw.ToString());
+            //
+            // dump the devices
+            foreach (var cDev in _foundDevices)
+            {
+                System.Diagnostics.Debug.WriteLine(cDev.ToString());
+            }
             return _foundDevices;
             // return Task.FromResult((IReadOnlyCollection<BluetoothDevice>)new List<BluetoothDevice>().AsReadOnly());
         }
