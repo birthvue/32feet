@@ -8,7 +8,6 @@
 using CoreBluetooth;
 using Foundation;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -32,7 +31,7 @@ namespace InTheHand.Bluetooth
 {
     partial class Bluetooth
     {
-        internal static CBCentralManager _manager;
+        internal static CBCentralManager? _manager;
 
         private static void Initialize()
         {

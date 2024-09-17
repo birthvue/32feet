@@ -190,7 +190,7 @@ namespace InTheHand.Bluetooth
 
         private void Peripheral_UpdatedCharacteristicValue(object sender, CBCharacteristicEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"e.Char ={e.Characteristic} - Char = {_characteristic}");
+          //  System.Diagnostics.Debug.WriteLine($"e.Char ={e.Characteristic} - Char = {_characteristic}");
             if (e.Characteristic.Equals(_characteristic))
             {
                 Exception? error = null;

@@ -115,7 +115,7 @@ namespace InTheHand.Bluetooth
 
             public override void OnCharacteristicChanged(ABluetooth.BluetoothGatt gatt, ABluetooth.BluetoothGattCharacteristic characteristic)
             {
-                System.Diagnostics.Debug.WriteLine($"CharacteristicChanged {characteristic.Uuid}");
+      //          System.Diagnostics.Debug.WriteLine($"CharacteristicChanged {characteristic.Uuid}");
                 _owner.CharacteristicChanged?.Invoke(_owner, new CharacteristicEventArgs { Characteristic = characteristic });
             }
 
