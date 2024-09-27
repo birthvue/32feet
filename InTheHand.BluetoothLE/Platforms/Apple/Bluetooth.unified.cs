@@ -8,9 +8,11 @@
 using CoreBluetooth;
 using Foundation;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 #if __IOS__
@@ -37,9 +39,9 @@ namespace InTheHand.Bluetooth
             if (_manager == null)
             {
                 Debug.WriteLine("Initialize");
-                
+
                 var hasInfoKey = CoreFoundation.CFBundle.GetMain().InfoDictionary.ContainsKey(new NSString("NSBluetoothAlwaysUsageDescription"));
-                if(!hasInfoKey)
+                if (!hasInfoKey)
                 {
                     throw new PlatformNotSupportedException("Application info.plist must contain an entry for NSBluetoothAlwaysUsageDescription");
                 }
@@ -62,7 +64,7 @@ namespace InTheHand.Bluetooth
         private static void _manager_DiscoveredPeripheral(object sender, CBDiscoveredPeripheralEventArgs e)
         {
             DiscoveredPeripheral?.Invoke(sender, e);
-            
+
             var bae = new BluetoothAdvertisingEvent(e.Peripheral, e.AdvertisementData, e.RSSI);
             AdvertisementReceived?.Invoke(sender, bae);
             if (!string.IsNullOrWhiteSpace(e.Peripheral.Name) && !_foundDevices.Contains(e.Peripheral))
@@ -87,10 +89,10 @@ namespace InTheHand.Bluetooth
 
         internal static event EventHandler<CBDiscoveredPeripheralEventArgs> DiscoveredPeripheral;
 
-        
+
 
         private static ObservableCollection<BluetoothDevice> _foundDevices = new ObservableCollection<BluetoothDevice>();
-               
+
 
 #if __IOS__
         internal static event EventHandler<CBPeripheral[]> OnRetrievedPeripherals;
@@ -100,7 +102,7 @@ namespace InTheHand.Bluetooth
         {
             Initialize();
             bool available = false;
-            
+
             if (_manager != null)
             {
                 System.Diagnostics.Debug.WriteLine($"GetAvailability:{_manager.State}");
@@ -147,12 +149,13 @@ namespace InTheHand.Bluetooth
             TaskCompletionSource<BluetoothDevice> tcs = new TaskCompletionSource<BluetoothDevice>();
 
             controller = UIAlertController.Create("Select a Bluetooth accessory", null, UIAlertControllerStyle.Alert);
-            controller.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, (a)=> {
+            controller.AddAction(UIAlertAction.Create("Cancel", UIAlertActionStyle.Cancel, (a) =>
+            {
                 tcs.SetResult(null);
                 StopScanning();
                 Debug.WriteLine(a == null ? "<null>" : a.ToString());
             }));
-            
+
             CGRect rect = new CGRect(0, 0, 272, 272);
             var tvc = new UITableViewController(UITableViewStyle.Plain)
             {
@@ -186,9 +189,41 @@ namespace InTheHand.Bluetooth
 #endif
         }
 
-        static Task<IReadOnlyCollection<BluetoothDevice>> PlatformScanForDevices(RequestDeviceOptions options, CancellationToken cancellationToken = default)
+        static async Task<IReadOnlyCollection<BluetoothDevice>> PlatformScanForDevices(RequestDeviceOptions options, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult((IReadOnlyCollection<BluetoothDevice>)new List<BluetoothDevice>().AsReadOnly());
+            //
+            //  clear the lis of found devices
+           // _foundDevices.ClearItems();
+            _foundDevices.Clear();
+            //
+            //  convert the options into the format apple needs
+            List<CBUUID> targetID = new List<CBUUID>();
+            foreach (var f in options.Filters)
+            {
+                targetID.AddRange(f.Services.Select(u => CBUUID.FromString(u.Value.ToString())));
+            }
+            int targetCNT = targetID.Count;
+            System.Diagnostics.Debug.WriteLine("target id list is count is " + targetCNT);
+            CBUUID[] targetItems = targetID.ToArray();
+            System.Diagnostics.Debug.WriteLine("target id list is " + targetItems);
+            _manager.ScanForPeripherals(targetItems);
+            int cnt = 0;
+            TimeSpan ts = TimeSpan.FromSeconds(5);
+         //   while ((_manager.IsScanning) && (cnt < 3))
+            {
+                cnt++;
+                try
+                {
+                    await Task.Delay(ts,CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message); //task was canceled
+                }
+            }
+            _manager.StopScan();
+            return _foundDevices;
+            // return Task.FromResult((IReadOnlyCollection<BluetoothDevice>)new List<BluetoothDevice>().AsReadOnly());
         }
 
         static async Task<IReadOnlyCollection<BluetoothDevice>> PlatformGetPairedDevices()
@@ -273,7 +308,7 @@ namespace InTheHand.Bluetooth
                 _manager.StopScan();
         }
 
-        
+
         private static async void AddAvailabilityChanged()
         {
             _oldAvailability = await PlatformGetAvailability();
