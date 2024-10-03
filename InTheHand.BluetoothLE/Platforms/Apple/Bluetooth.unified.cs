@@ -32,7 +32,7 @@ namespace InTheHand.Bluetooth
 {
     partial class Bluetooth
     {
-        internal static CBCentralManager _manager;
+        internal static CBCentralManager? _manager;
 
         private static void Initialize()
         {
@@ -164,10 +164,10 @@ namespace InTheHand.Bluetooth
             controller.PreferredContentSize = rect.Size;
             var source = new InTheHand.Bluetooth.Platforms.Apple.BluetoothTableViewSource(options);
             source.DeviceSelected += (s, e) =>
-             {
-                 tvc.DismissViewController(true, null);
-                 tcs.SetResult(e);
-             };
+            {
+                tvc.DismissViewController(true, null);
+                tcs.SetResult(e);
+            };
 
             tvc.TableView.Delegate = source;
             tvc.TableView.DataSource = source;
@@ -193,7 +193,7 @@ namespace InTheHand.Bluetooth
         {
             //
             //  clear the lis of found devices
-           // _foundDevices.ClearItems();
+            // _foundDevices.ClearItems();
             _foundDevices.Clear();
             //
             //  convert the options into the format apple needs
@@ -208,20 +208,29 @@ namespace InTheHand.Bluetooth
             System.Diagnostics.Debug.WriteLine("target id list is " + targetItems);
             _manager.ScanForPeripherals(targetItems);
             int cnt = 0;
-            TimeSpan ts = TimeSpan.FromSeconds(5);
-         //   while ((_manager.IsScanning) && (cnt < 3))
+            TimeSpan ts = TimeSpan.FromSeconds(8);
+            Stopwatch sw = Stopwatch.StartNew();
+            //while ((_manager.IsScanning) && (cnt < 3))
             {
                 cnt++;
                 try
                 {
-                    await Task.Delay(ts,CancellationToken.None);
+                    await Task.Delay(ts, CancellationToken.None);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message); //task was canceled
+                    System.Diagnostics.Debug.WriteLine(ex.Message); //task was canceled
                 }
             }
             _manager.StopScan();
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine("PlatformScanForDevices.ios scan took"  + sw.ToString());
+            //
+            // dump the devices
+            foreach (var cDev in _foundDevices)
+            {
+                System.Diagnostics.Debug.WriteLine(cDev.ToString());
+            }
             return _foundDevices;
             // return Task.FromResult((IReadOnlyCollection<BluetoothDevice>)new List<BluetoothDevice>().AsReadOnly());
         }
