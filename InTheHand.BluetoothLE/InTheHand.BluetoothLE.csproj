@@ -41,9 +41,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.4" PrivateAssets="All" />
+		<PackageReference Include="DotNet.ReproducibleBuilds" Version="1.2.25" PrivateAssets="All" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
 		<PackageReference Include="MSBuild.Sdk.Extras" Version="3.0.44" PrivateAssets="All" />
+		<PackageReference Include="Serilog" Version="4.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -214,7 +215,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-		<PackageReference Include="Linux.Bluetooth" Version="5.66.0" />
+		<PackageReference Include="Linux.Bluetooth" Version="5.67.1" />
 		<Compile Include="Platforms\Linux\*.cs" />
 	</ItemGroup>
 
