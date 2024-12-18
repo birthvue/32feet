@@ -149,7 +149,7 @@ namespace InTheHand.Bluetooth
                 Task.Run(async () =>
                 {
                     // ensure discovery times out after fixed delay
-                    await Task.Delay(5000);
+                    await Task.Delay(1000);
                     handle.Set();
                 });
                 handle.WaitOne();
